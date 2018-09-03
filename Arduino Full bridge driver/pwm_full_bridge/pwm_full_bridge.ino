@@ -28,6 +28,7 @@
 #define highled 6
 #define faultled 7
 #define faultin 2
+#define resetpin 4
 
 //=============PWM def start===========
 #define PRESCALER 1
@@ -94,6 +95,8 @@ void setup() {
   //=============ADC set end===========
   //=============Misc start==============
   pinMode (faultin, INPUT_PULLUP);
+  pinMode (resetpin, OUTPUT);
+  digitalWriteFast(resetpin, HIGH);
   attachInterrupt(digitalPinToInterrupt(faultin), fault, LOW); //just in case, don't connect any LED. A316j can pulldown 8mA max.
   //=============Misc end==============
 
@@ -139,16 +142,30 @@ void loop() {
 }
 
 void fault() {
-  OCR1A = 0;
+  OCR1A = 0;                                        // It will reset after 500sec, the fault goes high and we are good.
   OCR1B = 0;
   pinModeFast(Q1, INPUT);
   pinModeFast(Q2, INPUT);
   digitalWriteFast(faultled, HIGH);
-//  bool boollow = digitalReadFast(Q1);
-//  bool boolhigh = digitalReadFast(Q2);
-//  digitalWriteFast(lowled, boollow);
-//  digitalWriteFast(highled, boolhigh);
+  //  bool boollow = digitalReadFast(Q1);
+  //  bool boolhigh = digitalReadFast(Q2);
+  //  digitalWriteFast(lowled, boollow);
+  //  digitalWriteFast(highled, boolhigh);
   delay(500000);
+  digitalWriteFast(faultled, LOW);
+  delay(200);
+  digitalWriteFast(faultled, HIGH);
+  delay(200);
+  digitalWriteFast(faultled, LOW);
+  delay(200);
+  digitalWriteFast(faultled, HIGH);
+  delay(200);
+  digitalWriteFast(faultled, LOW);
+  delay(200);
+  digitalWriteFast(resetpin, LOW);
+  delay(100);
+  digitalWriteFast(resetpin, HIGH);
+  delay(50);
 }
 
 
